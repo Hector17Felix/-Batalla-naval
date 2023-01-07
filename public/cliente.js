@@ -62,21 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         },
     ]
-
     createBoard(userGrid, userSquares)
     createBoard(computerGrid, computerSquares)
-
     // Seleccion del modo de juego
     if (gameMode === 'singlePlayer') {
         startSinglePlayer()
     } else {
         startMultiPlayer()
     }
-
     // Multijugador
     function startMultiPlayer() {
         const socket = io();
-
         // Obten tu número de jugador del server
         socket.on('player-number', num => {
             if (num === -1) {
@@ -84,20 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 playerNum = parseInt(num)
                 if (playerNum === 1) currentPlayer = "enemy"
-
                 console.log(playerNum)
-
                 // Revisa el status de los otros jugadores
                 socket.emit('check-players')
             }
         })
-
         // Si el otro jugador se ha desconectado o conectado
         socket.on('player-connection', num => {
             console.log(`Jugador ${num} se fue`)
             playerConnectedOrDisconnected(num)
         })
-
         // Cuando el enemigo esta listo
         socket.on('enemy-ready', num => {
             enemyReady = true
@@ -107,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 setupButtons.style.display = 'none'
             }
         })
-
         // Revisa el status del jugador
         socket.on('check-players', players => {
             players.forEach((p, i) => {
@@ -118,18 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
         })
-
         // cuando se acaba el tiempo
         socket.on('timeout', () => {
             infoDisplay.innerHTML = '¿Sigues ahí? se te acabo el tiempo'
         })
-
         // Clic para el boton ready
         startButton.addEventListener('click', () => {
             if (allShipsPlaced) playGameMulti(socket)
             else infoDisplay.innerHTML = "Debes poner TODOS los barcos primero"
         })
-
         // Configurar listeners para disparar
         computerSquares.forEach(square => {
             square.addEventListener('click', () => {
@@ -139,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
         })
-
         // Cuando recibes un disparo
         socket.on('fire', id => {
             enemyGo(id)
@@ -147,20 +134,17 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('fire-reply', square.classList)
             playGameMulti(socket)
         })
-
         // Cuando se recibe una replica de disparo
         socket.on('fire-reply', classList => {
             revealSquare(classList)
             playGameMulti(socket)
         })
-
         function playerConnectedOrDisconnected(num) {
             let player = `.p${parseInt(num) + 1}`
             document.querySelector(`${player} .connected`).classList.toggle('active')
             if (parseInt(num) === playerNum) document.querySelector(player).style.fontWeight = 'bold'
         }
     }
-
     // Modo un solo jugador
     function startSinglePlayer() {
         generate(shipArray[0])
@@ -168,13 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
         generate(shipArray[2])
         generate(shipArray[3])
         generate(shipArray[4])
-
         startButton.addEventListener('click', () => {
             setupButtons.style.display = 'none'
             playGameSingle()
         })
     }
-
     // Creamos el tablero de juego
     function createBoard(grid, squares) {
         for (let i = 0; i < width * width; i++) {
@@ -184,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             squares.push(square)
         }
     }
-
     // Dibuja los barcos de las computadoras en ubicaciones aleatorias.
     function generate(ship) {
         let randomDirection = Math.floor(Math.random() * ship.directions.length)
@@ -192,17 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (randomDirection === 0) direction = 1
         if (randomDirection === 1) direction = 10
         let randomStart = Math.abs(Math.floor(Math.random() * computerSquares.length - (ship.directions[0].length * direction)))
-
         const isTaken = current.some(index => computerSquares[randomStart + index].classList.contains('taken'))
         const isAtRightEdge = current.some(index => (randomStart + index) % width === width - 1)
         const isAtLeftEdge = current.some(index => (randomStart + index) % width === 0)
-
         if (!isTaken && !isAtRightEdge && !isAtLeftEdge) current.forEach(index => computerSquares[randomStart + index].classList.add('taken', ship.name))
-
         else generate(ship)
     }
-
-
     // Rotación de los barcos
     function rotate() {
         if (isHorizontal) {
@@ -227,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     rotateButton.addEventListener('click', rotate)
-
     // moverse por el barco del jugador
     ships.forEach(ship => ship.addEventListener('dragstart', dragStart))
     userSquares.forEach(square => square.addEventListener('dragstart', dragStart))
@@ -236,34 +211,27 @@ document.addEventListener('DOMContentLoaded', () => {
     userSquares.forEach(square => square.addEventListener('dragleave', dragLeave))
     userSquares.forEach(square => square.addEventListener('drop', dragDrop))
     userSquares.forEach(square => square.addEventListener('dragend', dragEnd))
-
     let selectedShipNameWithIndex
     let draggedShip
     let draggedShipLength
-
     ships.forEach(ship => ship.addEventListener('mousedown', (e) => {
         selectedShipNameWithIndex = e.target.id
         // console.log(selectedShipNameWithIndex)
     }))
-
     function dragStart() {
         draggedShip = this
         draggedShipLength = this.childNodes.length
         // console.log(draggedShip)
     }
-
     function dragOver(e) {
         e.preventDefault()
     }
-
     function dragEnter(e) {
         e.preventDefault()
     }
-
     function dragLeave() {
         // console.log('drag leave')
     }
-
     function dragDrop() {
         let shipNameWithLastId = draggedShip.lastChild.id
         let shipClass = shipNameWithLastId.slice(0, -2)
@@ -273,15 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log(shipLastId)
         const notAllowedHorizontal = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 2, 22, 32, 42, 52, 62, 72, 82, 92, 3, 13, 23, 33, 43, 53, 63, 73, 83, 93]
         const notAllowedVertical = [99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60]
-
         let newNotAllowedHorizontal = notAllowedHorizontal.splice(0, 10 * lastShipIndex)
         let newNotAllowedVertical = notAllowedVertical.splice(0, 10 * lastShipIndex)
-
         selectedShipIndex = parseInt(selectedShipNameWithIndex.substr(-1))
-
         shipLastId = shipLastId - selectedShipIndex
         // console.log(shipLastId)
-
         if (isHorizontal && !newNotAllowedHorizontal.includes(shipLastId)) {
             for (let i = 0; i < draggedShipLength; i++) {
                 let directionClass
@@ -298,15 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 userSquares[parseInt(this.dataset.id) - selectedShipIndex + width * i].classList.add('taken', 'vertical', directionClass, shipClass)
             }
         } else return
-
         displayGrid.removeChild(draggedShip)
         if (!displayGrid.querySelector('.ship')) allShipsPlaced = true
     }
-
     function dragEnd() {
         // console.log('dragend')
     }
-
     // Logica para el Mukltijugador
     function playGameMulti(socket) {
         setupButtons.style.display = 'none'
@@ -316,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ready = true
             playerReady(playerNum)
         }
-
         if (enemyReady) {
             if (currentPlayer === 'user') {
                 turnDisplay.innerHTML = 'Tu turno'
@@ -326,12 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
     function playerReady(num) {
         let player = `.p${parseInt(num) + 1}`
         document.querySelector(`${player} .ready`).classList.toggle('active')
     }
-
     // Game Logic for Single Player
     function playGameSingle() {
         if (isGameOver) return
@@ -347,13 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(enemyGo, 1000)
         }
     }
-
     let destroyerCount = 0
     let submarineCount = 0
     let cruiserCount = 0
     let battleshipCount = 0
     let carrierCount = 0
-
     function revealSquare(classList) {
         const enemySquare = computerGrid.querySelector(`div[data-id='${shotFired}']`)
         const obj = Object.values(classList)
@@ -373,14 +329,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPlayer = 'enemy'
         if (gameMode === 'singlePlayer') playGameSingle()
     }
-
     let cpuDestroyerCount = 0
     let cpuSubmarineCount = 0
     let cpuCruiserCount = 0
     let cpuBattleshipCount = 0
     let cpuCarrierCount = 0
-
-
     function enemyGo(square) {
         if (gameMode === 'singlePlayer') square = Math.floor(Math.random() * userSquares.length)
         if (!userSquares[square].classList.contains('boom')) {
@@ -396,7 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPlayer = 'user'
         turnDisplay.innerHTML = 'Tu turno'
     }
-
     function checkForWins() {
         let enemy = 'computer'
         if (gameMode === 'multiPlayer') enemy = 'enemy'
@@ -440,7 +392,6 @@ document.addEventListener('DOMContentLoaded', () => {
             infoDisplay.innerHTML = `${enemy} hundio tu carguero`
             cpuCarrierCount = 10
         }
-
         if ((destroyerCount + submarineCount + cruiserCount + battleshipCount + carrierCount) === 50) {
             infoDisplay.innerHTML = "GANASTE"
             gameOver()
@@ -450,7 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
             gameOver()
         }
     }
-
     function gameOver() {
         isGameOver = true
         startButton.removeEventListener('click', playGameSingle)
